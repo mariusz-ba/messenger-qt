@@ -32,7 +32,7 @@ void ClientThread::write(QMap<QString, QString> message)
 {
     // Creating and openning buffer
     QBuffer buffer;
-    buffer.open(QIODevice::WriteOnly);
+    buffer.open(QIODevice::ReadWrite);
 
     // Using stream to serialize data in buffer
     QDataStream stream(&buffer);
@@ -40,6 +40,7 @@ void ClientThread::write(QMap<QString, QString> message)
     stream << message;
 
     // Get all serialized data from buffer
+    buffer.seek(0);
     QByteArray Data = buffer.readAll();
 
     // Send data to client
@@ -67,6 +68,12 @@ void ClientThread::onReadyRead()
     stream >> message;
 
     buffer.close();
+
+    qDebug() << message.size();
+    for(auto it = message.begin(); it != message.end(); ++it)
+    {
+        qDebug() << it.key() << " = " << it.value();
+    }
 
     // Pass recived data to server
     emit messageReceived(message);

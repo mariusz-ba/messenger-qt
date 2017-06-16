@@ -52,8 +52,10 @@ void Server::onMessageReceived(QMap<QString, QString> message)
      * QMap["newpassword"] = "newpassword";
      *
      */
+    qDebug() << "Size of passed message is: " << message.size();
     if(message["command"] == "login")
     {
+        qDebug() << message["username"] << " logging in.";
         // User tried to log in
 
         //TODO: check database for user
@@ -63,9 +65,10 @@ void Server::onMessageReceived(QMap<QString, QString> message)
     }
     else if(message["command"] == "send")
     {
+        qDebug() << "Message received.";
         // Update message in database and send to client if online
 
-        // Add message to database
+        // TODO: Add message to database
         // ...
 
         // Send to client if online
@@ -95,6 +98,7 @@ void Server::incomingConnection(qintptr socketDescriptor)
 
     connect(thread, SIGNAL(clientDisconnected(qintptr)), this, SLOT(onClientDisconnected(qintptr)));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(messageReceived(QMap<QString,QString>)), this, SLOT(onMessageReceived(QMap<QString,QString>)));
 
     thread->start();
 
