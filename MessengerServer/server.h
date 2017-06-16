@@ -17,6 +17,7 @@ public slots:
     void pause();
     void stop();
 
+    void onMessageReceived(QMap<QString, QString> message);
     void onClientDisconnected(qintptr socketDescriptor);
 
 protected:

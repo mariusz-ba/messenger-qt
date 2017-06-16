@@ -4,6 +4,19 @@
 #include <QThread>
 #include <QTcpSocket>
 
+#include <QDataStream>
+#include <QBuffer>
+
+#include <QImage>
+
+struct Client
+{
+    QString username; // Unique username
+    QString name;
+    QString surname;
+    QImage image;
+};
+
 class ClientThread : public QThread
 {
     Q_OBJECT
@@ -11,7 +24,12 @@ public:
     explicit ClientThread(qintptr socketDescriptor, QObject* parent = nullptr);
     void run() override;
 
+    Client client;
+
+    void write(QMap<QString, QString> message);
+
 signals:
+    void messageReceived(QMap<QString, QString> message);
     void clientDisconnected(qintptr socketDescriptor);
     void error(QTcpSocket::SocketError socketerror);
 

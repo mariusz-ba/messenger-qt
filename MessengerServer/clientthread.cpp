@@ -27,17 +27,49 @@ void ClientThread::run()
     exec();
 }
 
+// Send serialized message to client
+void ClientThread::write(QMap<QString, QString> message)
+{
+    // Creating and openning buffer
+    QBuffer buffer;
+    buffer.open(QIODevice::WriteOnly);
+
+    // Using stream to serialize data in buffer
+    QDataStream stream(&buffer);
+    stream.setVersion(QDataStream::Qt_5_1);
+    stream << message;
+
+    // Get all serialized data from buffer
+    QByteArray Data = buffer.readAll();
+
+    // Send data to client
+    m_Socket->write(Data);
+    m_Socket->waitForBytesWritten(3000);
+    m_Socket->flush();
+
+    // Closing buffer
+    buffer.close();
+}
+
 void ClientThread::onReadyRead()
 {
     QByteArray Data = m_Socket->readAll();
 
-    // Pass recived data to server
-
     qDebug() << m_SocketDescriptor << " Data in: " << Data;
 
-    m_Socket->write(Data);
-    m_Socket->waitForBytesWritten(3000);
-    m_Socket->flush();
+    QBuffer buffer(&Data);
+    buffer.open(QIODevice::ReadOnly);
+
+    QDataStream stream(&buffer);
+    stream.setVersion(QDataStream::Qt_5_1);
+
+    QMap<QString, QString> message;
+    stream >> message;
+
+    buffer.close();
+
+    // Pass recived data to server
+    emit messageReceived(message);
 }
 
 void ClientThread::onDisconnected()
