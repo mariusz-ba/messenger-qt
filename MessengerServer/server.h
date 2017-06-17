@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QTcpServer>
+#include <QSqlDatabase>
+#include <QSqlQuery>
 #include "clientthread.h"
 
 class Server : public QTcpServer
@@ -25,6 +27,7 @@ protected:
 
 private:
     QMap<qintptr, ClientThread*> m_Clients;
+    QSqlDatabase m_Database;
 };
 
 #endif // SERVER_H

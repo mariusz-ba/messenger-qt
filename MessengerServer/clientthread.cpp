@@ -4,6 +4,7 @@
 ClientThread::ClientThread(qintptr socketDescriptor, QObject* parent)
     : QThread(parent), m_SocketDescriptor(socketDescriptor)
 {
+    client.loggedin = false;
 }
 
 void ClientThread::run()

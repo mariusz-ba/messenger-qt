@@ -4,6 +4,23 @@
 Server::Server(QObject* parent)
     : QTcpServer(parent)
 {
+    m_Database = QSqlDatabase::addDatabase("QSQLITE");
+
+    m_Database.setDatabaseName("../../messenger.db");
+    if(!m_Database.open())
+    {
+        qDebug() << "Could not open database";
+    }
+    else
+    {
+        qDebug() << "Connected to database";
+
+        QSqlQuery query;
+        query.exec("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT UNIQUE, password TEXT, name TEXT, surname TEXT, image BLOB)");
+        query.exec("CREATE TABLE IF NOT EXISTS messages (id_from INTEGER, id_to INTEGER, message TEXT, datetime TEXT)");
+
+        qDebug() << "Tables: " << m_Database.tables().join(',');
+    }
 }
 
 Server::~Server()
@@ -12,6 +29,8 @@ Server::~Server()
     {
         iter.value()->onDisconnected();
     }
+
+    m_Database.close();
 }
 
 void Server::start(qint16 port)
@@ -55,13 +74,55 @@ void Server::onMessageReceived(QMap<QString, QString> message)
     qDebug() << "Size of passed message is: " << message.size();
     if(message["command"] == "login")
     {
-        qDebug() << message["username"] << " logging in.";
+        qDebug() << message["username"] << " is trying to log in.";
         // User tried to log in
 
         //TODO: check database for user
+        QSqlQuery query(m_Database);
+        query.prepare("SELECT username, password, name, surname, image FROM users WHERE username=:username");
+        query.bindValue(":username", message["username"]);
+        query.exec();
 
-        ClientThread* thread = qobject_cast<ClientThread*>(sender());
-        thread->client.username = message["username"];
+        //qDebug() << "Rows returned: " << query.last();
+
+        if(query.last())
+        {
+            qDebug() << "User exists";
+            // User exists
+            QString username = query.value(0).toString();
+            QString password = query.value(1).toString();
+
+            qDebug() << "Password: " << message["password"] << " | Expected: " << password;
+
+            // Check if password is correct
+            if(password == message["password"])
+            {
+                // Password correct
+                qDebug() << "Correct password";
+                // Set all user data
+                ClientThread* thread = qobject_cast<ClientThread*>(sender());
+                thread->client.username = message["username"];
+                thread->client.name = query.value(2).toString();
+                thread->client.surname = query.value(3).toString();
+                thread->client.image.loadFromData(query.value(4).toByteArray());
+                thread->client.loggedin = true;
+
+                qDebug() << thread->client.username << '\n' << thread->client.name << '\n' << thread->client.surname << '\n' << (thread->client.loggedin ? "Logged in" : "Not logged in");
+            }
+            else
+            {
+                // Wrong password
+                qDebug() << "Wrong password";
+            }
+        }
+        else
+        {
+            // User does not exist in database, register new one
+            qDebug() << "User does not exist";
+        }
+
+
+
     }
     else if(message["command"] == "send")
     {

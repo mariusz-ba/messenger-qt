@@ -15,6 +15,7 @@ struct Client
     QString name;
     QString surname;
     QImage image;
+    bool loggedin;
 };
 
 class ClientThread : public QThread
