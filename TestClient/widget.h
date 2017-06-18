@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTcpSocket>
 #include <QBuffer>
+#include <QImage>
 
 namespace Ui {
 class Widget;
@@ -17,7 +18,7 @@ public:
     explicit Widget(QWidget *parent = 0);
     ~Widget();
 
-    void sendMessage(const QMap<QString, QString>& message);
+    void sendMessage(const QMap<QString, QVariant>& message);
 
 private slots:
     void on_buttonLogin_clicked();
@@ -31,6 +32,8 @@ private:
     Ui::Widget *ui;
     QTcpSocket* m_Socket;
     QString m_Username;
+    QImage m_UserImage;
+    QPixmap m_Pixmap;
 };
 
 #endif // WIDGET_H

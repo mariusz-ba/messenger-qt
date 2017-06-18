@@ -27,10 +27,10 @@ public:
 
     Client client;
 
-    void write(QMap<QString, QString> message);
+    void write(QMap<QString, QVariant> message);
 
 signals:
-    void messageReceived(QMap<QString, QString> message);
+    void messageReceived(QMap<QString, QVariant> message);
     void clientDisconnected(qintptr socketDescriptor);
     void error(QTcpSocket::SocketError socketerror);
 

@@ -6,6 +6,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include "clientthread.h"
+#include <QImage>
 
 class Server : public QTcpServer
 {
@@ -19,7 +20,7 @@ public slots:
     void pause();
     void stop();
 
-    void onMessageReceived(QMap<QString, QString> message);
+    void onMessageReceived(QMap<QString, QVariant> message);
     void onClientDisconnected(qintptr socketDescriptor);
 
 protected:

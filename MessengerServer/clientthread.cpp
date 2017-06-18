@@ -29,7 +29,7 @@ void ClientThread::run()
 }
 
 // Send serialized message to client
-void ClientThread::write(QMap<QString, QString> message)
+void ClientThread::write(QMap<QString, QVariant> message)
 {
     // Creating and openning buffer
     QBuffer buffer;
@@ -65,7 +65,7 @@ void ClientThread::onReadyRead()
     QDataStream stream(&buffer);
     stream.setVersion(QDataStream::Qt_5_1);
 
-    QMap<QString, QString> message;
+    QMap<QString, QVariant> message;
     stream >> message;
 
     buffer.close();
